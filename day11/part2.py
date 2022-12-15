@@ -1,12 +1,15 @@
 import sys, fileinput, re, heapq
 
+from collections import deque
+#import numpy as np
+
 filename = sys.argv[1]
 
 import re
 
 monkeys = []
 inspect_count = [] # index = monkey number, value = number of items inspected
-rounds = 10000
+rounds = int(sys.argv[2])
 
 with open(filename) as file:
     line = ""
@@ -26,6 +29,9 @@ with open(filename) as file:
             # Starting items
             line = file.readline().strip().split(":")
             starting_ = re.findall(r'\d+', line[1].strip())
+            #for i in starting_: starting_[starting_.index(i)] = float(i)
+            print(starting_)
+            #starting_ = deque(starting_)
 
             # Operation
             line = file.readline().strip().split(":")
@@ -60,21 +66,38 @@ file.close()
 
 # solution
 for _ in range(0, rounds):
-    if _ % 100 == 0 : print("--- Round ", _ + 1, " ---")
+    if _ % 1000 == 0 or _ == 20:
+        print("--- Round ", _ + 1, " ---")
+        print(inspect_count)
+    i = 0
     for monkey in monkeys:
         #print("Monkey ", monkeys.index(monkey), ":")
-        for item in monkey[0]:
-            #print("  Monkey inspects an item with a worry level of ", item, ".", sep="")
+        #for item in monkey[0]:
+        inspect_count[i] += len(monkey[0])
+        for item in enumerate(monkey[0]):
+            #print("  Monkey inspects an item with a worry level of ")
             # update inspect count
-            inspect_count[monkeys.index(monkey)] = inspect_count[monkeys.index(monkey)] + 1
+            #inspect_count[monkeys.index(monkey)] = inspect_count[monkeys.index(monkey)] + 1
 
             # perform operation
-            worry = int(item)
+            #print(item[1])
+            #print(int(item[1]))
+            #print(float(item[1]))
+            
+            worry = int(item[1])
+            
+            #print(worry)
 
             op = monkey[1][0]
             eq = op.find("=")
             op = op[eq + 1:]
-            worry = eval(op, {'old': int(item)})
+            opp = op[4:]
+
+            #print(worry)
+
+            worry = eval(op, {'old': worry})
+            
+            #print("worry")
 
             # after operation
 
@@ -87,7 +110,8 @@ for _ in range(0, rounds):
             # test operation
 
             throw_to = -1
-
+            print("worry",worry)
+            print("val",int(monkey[2][0]))
             if worry % int(monkey[2][0]) == 0:
                 # true condition
                 #print("    Current worry level is divisible by ", monkey[2][0], ".", sep="")
@@ -103,6 +127,7 @@ for _ in range(0, rounds):
             #monkey[0].pop(monkey[0].index(item)) # remove item from current monkey
             monkeys[throw_to][0].append(worry) # add item to next monkey
         monkey[0] = [] # has thrown all items
+        i += 1
     
     #print("\nAfter round " , _ + 1 , ", the monkeys are holding items with these worry levels:")
     #for monkey in monkeys:

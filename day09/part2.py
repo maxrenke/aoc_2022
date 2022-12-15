@@ -8,7 +8,7 @@ tail = (0,0) # tail
 head = (0,0) # head
 rope = [] # rope
 
-rope_length = 2
+rope_length = 10
 rope.append(head)
 for i in range(0, rope_length - 2):
     rope.append((0,0))
@@ -19,7 +19,7 @@ print("rope:", rope)
 
 visited = set() # set of visited coordinates
 
-def move(head,tail,dir, dist):
+def move(dir, dist):
     global rope
     dist = int(dist)
     dir_value = (0,0)
@@ -32,76 +32,57 @@ def move(head,tail,dir, dist):
     elif dir == "D":
         dir_value = (0,-1)
     
-    #print("move in", dir_value)
+    print("move in", dir_value)
     # move head in direction
     #move head
-    head = (head[0] + dir_value[0], head[1] + dir_value[1])
+    rope[0] = (rope[0][0] + dir_value[0], rope[0][1] + dir_value[1])
 
     for i in range(1, rope_length):
-        print("check rope", i)
-        last = rope[i-1]
-        print(last)
-        curr = rope[i]
-        print(curr)
+        if not touching(i, i-1):
+            move_knot(i, i-1, dir_value[0], dir_value[1])
+            
         
 
-    # check tail
-    # if head == 2 in direction, move tail in direction (1)
-    if head[0] == tail[0] + 2*dir_value[0] and head[1] == tail[1] + 2*dir_value[1]:
-        tail = (tail[0] + dir_value[0], tail[1] + dir_value[1])
-
-    # else if head and tail aren't touching, and aren't in same row, move one step diagonally
-    #check if touching
-    if not touching(head,tail) and tail[0] != head[0] and tail[1] != head[1]:
-        head, tail = move_diag(head,tail)
-
     # after each move, add tail to visited
-    visited.add(tail)
+    visited.add(rope[rope_length-1])
 
-    if not touching(head,tail):
-        print("not touching!")
-        exit()
+    #if not touching(rope[0],rope[rope_length-1]):
+    for i in range(0, rope_length-1):
+        if not touching(i,i-1):
+            print("not touching!")
+            #exit()
 
-    return head, tail
+    #return rope
 
-def move_diag(head,tail):
-    #print("move diag")
-    x = 0
-    y = 0
+def move_knot(knot1,knot2,dir_value_x,dir_value_y):
+    global rope
+    print("move diag")
+    x = dir_value_x
+    y = dir_value_y
 
-    # above or below
-    if tail[1] < head[1]:
-        y = 1
-    else:
-        y = -1
-
-    # left or right
-    if tail[0] < head[0]:
-        x = 1
-    else:
-        x = -1
 
     # move tail in direction
-    tail = (tail[0] + x, tail[1] + y)
-    visited.add(tail)
+    rope[knot1] = (rope[knot1][0] + x, rope[knot1][1] + y)
+    visited.add(rope[rope_length-1])
 
-    return head, tail
+    #return knot1, knot2
 
-def touching(head,tail):
+def touching(knot1,knot2):
+    global rope
     #print( "tail", tail, "head", head)
-    x1 = tail[0]
-    x2 = head[0]
-    y1 = tail[1]
-    y2 = head[1]
+    x1 = rope[knot1][0]
+    x2 = rope[knot2][0]
+    y1 = rope[knot1][1]
+    y2 = rope[knot2][1]
     distance = (((x2 - x1) ** 2) + (y2 - y1) ** 2) ** (1 / 2)
     #print("distance", distance)
 
-    if distance <= 2: #within 2
+    if distance <= 1: #within 2
         return True
     return False
 
 # add tail to visited (at start)
-visited.add(tail) 
+visited.add(tail)
 
 # read file and execute instructions
 with open(filename) as file:
@@ -118,14 +99,15 @@ with open(filename) as file:
         #print("dir: " + dir + " dist: " + dist)
 
         for i in range(0, int(dist)):
-            head, tail = move(head,tail,dir, dist)
+            move(dir, dist)
         #print("head",head)
         #print("tail",tail)
 
 file.close()
 
-print("head",head)
-print("tail",tail)
+print("head",rope[0])
+print("tail",rope[rope_length-1])
+print("rope", rope)
 
-print("visited", visited)
+#print("visited", visited)
 print("positions:", len(visited))
